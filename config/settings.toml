@@ -1,0 +1,7 @@
+[default]
+app_name = "TrackerRing"
+
+[default.db]
+type = "json"
+path = "./data/db/test_db.json"
+preset = "test"
