@@ -1,5 +1,8 @@
 # tracker ring
 
+![ExampleView](./docs/example.png)
+
+
 ## Open
 - [ ] Resolve import struct
   - [ ] init files
