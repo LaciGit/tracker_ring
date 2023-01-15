@@ -40,6 +40,8 @@ class TestController(unittest.TestCase):
         self._controller.post(sample)
         self.assertEqual(sample, self._controller.get(Area.__name__, sample.id))
 
+        self._controller.delete(sample)
+
     def test__get_df(self):
         df = self._controller.get_df()
         self.assertTrue(isinstance(df, pd.DataFrame))

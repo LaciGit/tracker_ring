@@ -12,6 +12,7 @@ from tracker.dashboard import (
 from tracker.db import Controller
 
 pn.extension(
+    'plotly',
     sizing_mode="stretch_both",
     notifications=True,
 )
@@ -32,7 +33,8 @@ template.main[3:5, :8] = DURATION_PLTOS.create_plot_2
 template.main[3:5, 8:] = KPI_TAGS.create_plot
 template.main[5:, :] = CONTROLLER
 
-template.sidebar_width = 350
+template.sidebar_width = 380
+template.sidebar_height = 1000
 template.header_background = "#428bca"
 
 template.servable()

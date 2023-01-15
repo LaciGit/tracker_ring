@@ -2,6 +2,13 @@
 .vscode
 data_prep.ipynb
 
+config/settings.local.toml
+data/db/test_write.json
+
+# ignore work setup
+data/db/work_db.json
+tracker/db/db/preset/work.py
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

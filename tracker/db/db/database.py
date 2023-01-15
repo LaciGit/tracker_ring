@@ -17,6 +17,18 @@ class Database(ABC):
         pass
 
     @abstractmethod
+    def update_by_child(
+        self,
+        parent: DBBase,
+        child: DBBase,
+    ) -> None:  # pragma: no cover
+        pass
+
+    @abstractmethod
+    def delete(self, *objects: DBBase) -> None:  # pragma: no cover
+        pass
+
+    @abstractmethod
     def get(
         self,
         cls: str,

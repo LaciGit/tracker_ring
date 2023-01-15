@@ -10,16 +10,18 @@
   - [ ] init files
   - [ ] caps imports for already init class (param)
 - [ ] Doc
+  - [ ] Struct
   - [ ] README
 - [ ] Logging
 - [ ] Commit hooks
-- [ ] Controller UI elements
-  - [ ] add area
-  - [ ] add topic
-  - [ ] add tasks
-  - [ ] add tag
+- [x] Controller UI elements
+  - [x] add area
+  - [x] add topic
+  - [x] add tasks
+  - [x] add tag
+  - [ ] update UI element on reload
 - [ ] Dashboard
-  - [ ] Swtich
-    - [ ] ... between week or day view
+  - [x] Swtich
+    - [x] ... between YearWeek or day view
   - [ ] Plots
     - [ ] Heatmap Topic over time

@@ -6,7 +6,7 @@ import holoviews as hv
 
 from plotly.graph_objects import Layout
 from tracker.dashboard import DATA_HANDLER
-
+from tracker.dashboard.params.plot_view import PLOT_VIEW
 
 color_map = [
     "#428bca",
@@ -26,6 +26,17 @@ color_map = [
 pn.extension(sizing_mode="stretch_both")
 
 
+def check_valid_df(df):
+
+    if df.shape[0] == 0 or "duration" not in df.columns:
+        return pn.pane.Alert(
+            "**Error**: No data for this filter config availible!",
+            alert_type="danger",
+        )
+    else:
+        return False
+
+
 class DurationPlot(param.Parameterized):
     data_handler = param.ClassSelector(
         param.Parameterized,
@@ -33,42 +44,53 @@ class DurationPlot(param.Parameterized):
         instantiate=False,
     )
 
-    @pn.depends("data_handler.param")
+    plot_view = param.ClassSelector(
+        param.Parameterized,
+        PLOT_VIEW,
+        instantiate=False,
+    )
+
+    @pn.depends("data_handler.param", "plot_view.param")
     def create_plot_1(self):
         df = self.data_handler._df_result
 
-        if df.shape[0] == 0:
-            return pn.pane.Alert(
-                "**Error**: No data for this filter config availible!",
-                alert_type="danger",
-            )
+        not_valid = check_valid_df(df)
+        if not_valid:
+            return not_valid
+
+        gr_col = "year_week"
+        ylim = 60
+        if not self.plot_view.year_week:
+            gr_col = "week_weekDay"
+            ylim = 15
 
         df["duration_h"] = df.duration / 60
         df["day_of_year"] = df.time.dt.day_of_year
+        df["weekday"] = df.time.dt.isocalendar().day
         df["year"] = df.time.dt.isocalendar().year
         df["weekofyear"] = df.time.dt.isocalendar().week
+        df["week_weekDay"] = df.apply(lambda x: f"{x.weekofyear}-{x.weekday}", axis=1)
         df["year_week"] = df.apply(lambda x: f"{x.year}-{x.weekofyear}", axis=1)
 
-        df = df[["year_week", "duration_h", "task_name"]]
+        df = df[[gr_col, "duration_h", "task_name"]]
 
         # define how to aggregate various fields
-        agg_functions = {
-            "duration_h": "sum",
-        }
+        agg_functions = {"duration_h": "sum"}
 
         # create new DataFrame by combining rows with same id values
         df_new = (
-            df.groupby(["task_name", "year_week"])
+            df.groupby(["task_name", gr_col])
             .aggregate(agg_functions)
             .reset_index()
-            .sort_values("year_week")
+            .sort_values(gr_col)
         )
 
-        mean_duration = df_new.groupby("year_week")["duration_h"].sum().mean()
+        mean_duration = df_new.groupby(gr_col)["duration_h"].sum().mean()
 
         return df_new.hvplot.bar(
-            x="year_week",
+            x=gr_col,
             xlabel="",
+            ylim=(0, ylim),
             y="duration_h",
             ylabel="duration [h]",
             by="task_name",
@@ -94,15 +116,13 @@ class DurationPlot(param.Parameterized):
             alpha=0.2,
         )
 
-    @pn.depends("data_handler.param")
+    @pn.depends("data_handler.param", "plot_view.param")
     def create_plot_2(self):
         df = self.data_handler._df_result
 
-        if df.shape[0] == 0:
-            return pn.pane.Alert(
-                "**Error**: No data for this filter config availible!",
-                alert_type="danger",
-            )
+        not_valid = check_valid_df(df)
+        if not_valid:
+            return not_valid
 
         df = df.dropna(axis=1, how="all")
         if not "tag_name" in df.columns:
@@ -111,16 +131,24 @@ class DurationPlot(param.Parameterized):
                 alert_type="danger",
             )
 
+        gr_col = "year_week"
+        ylim = 60
+        if not self.plot_view.year_week:
+            gr_col = "week_weekDay"
+            ylim = 15
+
         df[["year", "week", "day"]] = df.time.dt.isocalendar()
+        df["week_weekDay"] = df.apply(lambda x: f"{x.weekofyear}-{x.day}", axis=1)
         df["year_week"] = df.apply(lambda x: f"{x.year}-{x.weekofyear}", axis=1)
 
-        df_gr = df.groupby(["year_week", "tag_name"]).count()
+        df_gr = df.groupby([gr_col, "tag_name"]).count()
         df_gr = df_gr.rename(columns={"task_name": "count"})
         df_gr = df_gr[["count"]]
 
         return df_gr.hvplot.bar(
             xlabel="",
             ylabel="",
+            ylim=(0,ylim),
             alpha=0.8,
             grid=True,
             title="Count of tags in given tasks over calendar weeks",
@@ -150,14 +178,15 @@ class Sunburst(param.Parameterized):
     @pn.depends("data_handler.param")
     def create_plot(self):
 
-        df_filter = self.data_handler._df_result[
+        df_filter = self.data_handler._df_result
+
+        not_valid = check_valid_df(df_filter)
+        if not_valid:
+            return not_valid
+
+        df_filter = df_filter[
             ["duration", "area_name", "topic_name", "task_name", "tag_name"]
         ]
-        if df_filter.shape[0] == 0:
-            return pn.pane.Alert(
-                "**Error**: No data for this filter config availible!",
-                alert_type="danger",
-            )
 
         df_filter = df_filter.dropna(axis=1, how="all")
 
@@ -209,6 +238,12 @@ class KpiTags(param.Parameterized):
 
     @pn.depends("data_handler.param")
     def create_plot(self):
+
+        df_filter = self.data_handler._df_result
+
+        not_valid = check_valid_df(df_filter)
+        if not_valid:
+            return not_valid
 
         df = self.data_handler._df_result[["tag_name", "topic_name", "duration"]]
 

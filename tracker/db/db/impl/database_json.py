@@ -42,6 +42,36 @@ class DatabaseJSON(Database):
 
             attr[object.id] = object
 
+    def delete(self, *objects: DBBase) -> None:
+        for object in objects:
+            attr_name = object.__class__.__name__.lower()
+
+            attr = getattr(self._db, f"{attr_name}s")
+
+            if attr.get(object.id):
+                del attr[object.id]
+
+    def update_by_child(self, parent: DBBase, child: DBBase) -> None:
+        # check if parent exists
+        attr_name = parent.__class__.__name__.lower()
+        attr = getattr(self._db, f"{attr_name}s")
+        parent = attr.get(parent.id)
+        if not parent:
+            raise LookupError(f"'{attr_name}' does not exists!")
+
+        # check if child exists
+        child_attr_name = child.__class__.__name__.lower()
+        child_attr = getattr(self._db, f"{child_attr_name}s")
+        child = child_attr.get(child.id)
+        if not child:
+            raise LookupError(f"'{child_attr_name}' does not exists!")
+
+        # update
+        child_container = getattr(parent, f"{child_attr_name}s")
+        child_container.append(child.id)
+
+        attr[parent.id] = parent
+
     def get(
         self,
         cls: str,

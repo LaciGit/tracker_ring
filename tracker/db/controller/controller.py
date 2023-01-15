@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 
-from datetime import datetime
+from datetime import datetime, timedelta
 from functools import cache
 from typing import List, Optional, Tuple
 
@@ -32,11 +32,22 @@ class Controller:
         else:
             raise NotImplementedError("DB type not implemented!")
 
-    def get(self, cls: str, id: Optional[str] = None, name: Optional[str] = None) -> DBBase:
+    def get(
+        self, cls: str, id: Optional[str] = None, name: Optional[str] = None
+    ) -> DBBase:
         return self._db.get(cls, id, name)
 
     def post(self, *objects: DBBase) -> None:
         self._db.post(*objects)
+        self.save()
+
+    def delete(self, *objects: DBBase) -> None:
+        self._db.delete(*objects)
+        self.save()
+
+    def update_by_child(self, parent: DBBase, child: DBBase) -> None:
+        self._db.update_by_child(parent, child)
+        self.save()
 
     def get_df(self, clean_ids: Optional[bool] = False) -> pd.DataFrame:
         if clean_ids:
@@ -58,13 +69,18 @@ class Controller:
         """
         ids = self._db.get_unique(cls)
         if not as_name:
-            return list(set(ids))
+            return sorted(list(set(ids)))
 
-        return set([self.get(cls=cls, id=id).name for id in ids])
+        return sorted(list(set([self.get(cls=cls, id=id).name for id in ids])))
 
     def get_time_range(self) -> Tuple[datetime]:
-        df = self.get_df(clean_ids=True)
-        return (df.time.min(), df.time.max())
+        try:
+            df = self.get_df(clean_ids=True)
+            return (df.time.min(), df.time.max() + timedelta(days=1))
+        except:
+            print("Can't determine time!")
+
+        return (datetime.now() - timedelta(days=30), datetime.now())
 
     def save(self) -> None:
         self._db.save()

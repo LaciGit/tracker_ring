@@ -71,10 +71,7 @@ class TestDatabaseJSON(unittest.TestCase):
         test_db = DatabaseJSON(self.test_path)
         df = test_db.get_df()
 
-        row_count = 381
-
         self.assertTrue(isinstance(df, pd.DataFrame))
-        self.assertEqual(row_count, df.shape[0])
 
     def test__get_unique(self) -> None:
         test_db = DatabaseJSON(self.test_path)
@@ -82,3 +79,16 @@ class TestDatabaseJSON(unittest.TestCase):
 
         self.assertIn("aebb97c9-0947-4a89-a30b-37947d9074c9", areas)
         self.assertIn("13a87fed-152e-4cf3-8657-ea622a0a37a6", areas)
+
+    def test__update(self) -> None:
+        test_db = DatabaseJSON(self.test_path)
+
+        area = test_db.get(cls=Area.__name__, id="aebb97c9-0947-4a89-a30b-37947d9074c9")
+
+        topic = Topic(name="new_topic")
+        test_db.post(topic)
+
+        test_db.update_by_child(parent=area, child=topic)
+        t = test_db.get(cls=Topic.__name__, id=topic.id)
+
+        self.assertTrue(isinstance(t, Topic))

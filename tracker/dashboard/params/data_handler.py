@@ -51,11 +51,14 @@ class DataHandler(param.Parameterized):
         time_to = self.filter.times[1]
 
         query.append("((time >= @time_from) & time <= @time_to )")
-
-        if query:
-            self._df_result = self._df_original.query(" & ".join(query)).copy(deep=True)
-        else:
-            self._df_result = self._df_original
+        try:
+            if query:
+                self._df_result = self._df_original.query(" & ".join(query)).copy(deep=True)
+            else:
+                self._df_result = self._df_original
+            print(f"Applied query: {query=}")
+        except:
+            print(f"Could not apply query: {query=}")
 
 
 DATA_HANDLER = DataHandler()

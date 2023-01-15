@@ -43,7 +43,7 @@ class Filters(param.Parameterized):
     times = param.DateRange(
         default=_get_unique()["times"],
         softbounds=controller.get_time_range(),
-        step=1000 * 60 * 60 * 24 * 5,
+        step=1000 * 60 * 60 * 24,
     )
     tasks = param.ListSelector(
         objects=_get_unique()["tasks"],
@@ -59,6 +59,7 @@ class Filters(param.Parameterized):
 
     def _reset_data(self):
         _get_unique.clear()
+
         self._data_last_loaded = datetime.now()
         for param in self.param:
             if param not in ["reset_button", "reset_data_button", "name", "times"]:
@@ -99,9 +100,8 @@ class Filters(param.Parameterized):
             "times": {
                 "type": pn.widgets.DatetimeRangeSlider,
                 "show_value": False,
-                "bar_color": "#FF0000",
                 "throttled": True,
-                "callback_throttle": 1000 * 2,
+                "callback_throttle": 1000 * 4,
                 "bar_color": "#428bca",
             },
             "tasks": {
