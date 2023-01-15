@@ -2,6 +2,8 @@
 
 ![ExampleView](./docs/example.png)
 
+## Struct
+![Struct](./docs/tracker_ring.drawio.png)
 
 ## Open
 - [ ] Resolve import struct
