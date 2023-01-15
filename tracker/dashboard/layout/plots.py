@@ -60,9 +60,11 @@ class DurationPlot(param.Parameterized):
 
         gr_col = "year_week"
         ylim = 60
+        title_over = "calendar weeks"
         if not self.plot_view.year_week:
             gr_col = "week_weekDay"
             ylim = 15
+            title_over = "weekdays"
 
         df["duration_h"] = df.duration / 60
         df["day_of_year"] = df.time.dt.day_of_year
@@ -96,7 +98,7 @@ class DurationPlot(param.Parameterized):
             by="task_name",
             stacked=True,
             legend="top",
-            title="Stacked duration of tasks over calendar weeks",
+            title=f"Stacked duration of tasks over {title_over}",
             alpha=0.8,
             grid=True,
             cmap={
@@ -133,9 +135,11 @@ class DurationPlot(param.Parameterized):
 
         gr_col = "year_week"
         ylim = 60
+        title_over = "calendar weeks"
         if not self.plot_view.year_week:
             gr_col = "week_weekDay"
             ylim = 15
+            title_over = "weekdays"
 
         df[["year", "week", "day"]] = df.time.dt.isocalendar()
         df["week_weekDay"] = df.apply(lambda x: f"{x.weekofyear}-{x.day}", axis=1)
@@ -151,7 +155,7 @@ class DurationPlot(param.Parameterized):
             ylim=(0,ylim),
             alpha=0.8,
             grid=True,
-            title="Count of tags in given tasks over calendar weeks",
+            title=f"Count of tags in given tasks over {title_over}",
             legend="top",
             cmap={
                 v: color_map[i]
